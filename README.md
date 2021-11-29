@@ -1,6 +1,6 @@
 # vue-electron-with-binance-api
 
-This project was created by VueJs, Electron, Vuetify, and Binance Api then the user can set the expected future price for getting notification from the Binance exchange.
+This project was created by VueJs, Electron, NodeJs, Vuetify, and Binance Api then the user can set the expected future price for getting notification from the Binance exchange.
 
 <img src="https://user-images.githubusercontent.com/18566658/143886046-9c5ebe4a-84dc-4b4c-a9c3-1e19787489b2.png" width="400">
 

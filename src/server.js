@@ -10,6 +10,8 @@ global.symbols = []
 global.isServiceRunning = false
 global.lineApiToken = null
 
+const binanceApi = new Binance()
+
 app.use(cors())
 app.use(express.json())
 
@@ -40,30 +42,26 @@ const notifyMsgToLine = async (msg) => {
 }
 
 const thirtyJob = new CronJob('0/30 * * * * *', async () => {
-    console.log('You will see this message every 30 seconds')
     if (global.isServiceRunning) {
-        const binance = new Binance()
-
         for (let i = 0; i < global.symbols.length; i++) {
             const symbol = global.symbols[i]
             if (symbol.interval === '30s') {
-                const res = await binance.prices(symbol.name)
+                const res = await binanceApi.prices(symbol.name)
                 const lastPrice = parseFloat(res[symbol.name]).toFixed(2)
 
-                if (symbol.shouldSell && symbol.shouldSell <= lastPrice) {
-                    const msg = `Sell - ควร Shot ${symbol.name} แล้วนะ ราคาปัจจุบันอยู่ที่ ${lastPrice}`
-                    await notifyMsgToLine(msg)
-                } else if (symbol.quicklyShouldSell && symbol.quicklyShouldSell <= lastPrice) {
-                    const msg = `Quickly Sell - ควร Shot ${symbol.name} แล้วนะ ราคาปัจจุบันอยู่ที่ ${lastPrice}`
-                    await notifyMsgToLine(msg)
-                }
-
-                if (symbol.shouldBuy && symbol.shouldBuy >= lastPrice) {
-                    const msg = `Buy - ควร Long ${symbol.name} แล้วนะ ราคาปัจจุบันอยู่ที่ ${lastPrice}`
-                    await notifyMsgToLine(msg)
-                } else if (symbol.quicklyShouldBuy && symbol.quicklyShouldBuy >= lastPrice) {
-                    const msg = `Quickly Buy - ควร Long ${symbol.name} แล้วนะ ราคาปัจจุบันอยู่ที่ ${lastPrice}`
-                    await notifyMsgToLine(msg)
+                for (let j = 0; j < symbol.triggers.length; j++) {
+                    const triggerInSymbol = symbol.triggers[j]
+                    if (triggerInSymbol.price && triggerInSymbol.operation &&
+                        triggerInSymbol.operation === 'Greater Than' &&
+                        lastPrice >= triggerInSymbol.price) {
+                        const msg = `The latest price of ${symbol.name} is greater than ${triggerInSymbol.price} which current price is ${lastPrice}.`
+                        await notifyMsgToLine(msg)
+                    } else if (triggerInSymbol.price && triggerInSymbol.operation &&
+                                triggerInSymbol.operation === 'Less Than' &&
+                                lastPrice <= triggerInSymbol.price) {
+                        const msg = `The latest price of ${symbol.name} is less than ${triggerInSymbol.price} which current price is ${lastPrice}.`
+                        await notifyMsgToLine(msg)
+                    }
                 }
             }
         }

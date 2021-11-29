@@ -57,15 +57,6 @@
                             mdi-delete
                         </v-icon>
                     </div>
-                    <div>
-                        <v-btn
-                            @click="addOperation()"
-                            dark
-                            color="success"
-                            x-small>
-                            Add an operation
-                        </v-btn>
-                    </div>
                 </v-col>
                 <v-col
                     cols="4"
@@ -88,50 +79,56 @@
                         {{ symbol.status.toUpperCase() }}
                     </v-btn>
                 </v-col>
-                <v-col
-                    cols="3"
-                    class="pt-0">
-                    <v-text-field
-                        v-model.number="symbol.quicklyShouldSell"
-                        dark
-                        label="Quickly Sell"
-                        placeholder="Shot"
-                        :disabled="disabledInput">
-                    </v-text-field>
-                </v-col>
-                <v-col
-                    cols="3"
-                    class="pt-0">
-                    <v-text-field
-                        v-model.number="symbol.shouldSell"
-                        dark
-                        label="Should Sell"
-                        placeholder="Shot"
-                        :disabled="disabledInput">
-                    </v-text-field>
-                </v-col>
-                <v-col
-                    cols="3"
-                    class="pt-0">
-                    <v-text-field
-                        v-model.number="symbol.shouldBuy"
-                        dark
-                        label="Should Buy"
-                        placeholder="Long"
-                        :disabled="disabledInput">
-                    </v-text-field>
-                </v-col>
-                <v-col
-                    cols="3"
-                    class="pt-0">
-                    <v-text-field
-                        v-model.number="symbol.quicklyShouldBuy"
-                        dark
-                        label="Quickly Buy"
-                        placeholder="Long"
-                        :disabled="disabledInput">
-                    </v-text-field>
-                </v-col>
+                <v-row
+                    v-for="(trigger, indexTrigger) in symbol.triggers"
+                    :key="indexTrigger"
+                    class="px-3">
+                    <v-col
+                        cols="4">
+                        <v-btn
+                            v-if="indexTrigger < 1"
+                            @click="addTrigger(indexSymbol)"
+                                dark
+                                color="success"
+                                :disabled="disabledInput">
+                                + trigger
+                            </v-btn>
+                    </v-col>
+                    <v-col
+                        cols="3"
+                        class="pt-0">
+                        <v-text-field
+                            v-model.number="trigger.price"
+                            dark
+                            label="Price"
+                            placeholder="Price"
+                            :disabled="disabledInput">
+                        </v-text-field>
+                    </v-col>
+                    <v-col
+                        cols="4"
+                        class="pt-0">
+                        <v-select
+                            v-model="trigger.operation"
+                            dark
+                            :items="operationItems"
+                            :disabled="disabledInput"
+                            label="Operation"
+                        ></v-select>
+                    </v-col>
+                    <v-col
+                        cols="1">
+                        <v-icon
+                            v-if="indexTrigger > 0"
+                            color="white"
+                            size="16px"
+                            class="delete-trigger-btn pt-2"
+                            :disabled="disabledInput"
+                            @click="deleteTrigger(indexSymbol, indexTrigger)">
+                            mdi-delete
+                        </v-icon>
+                    </v-col>
+                </v-row>
             </v-row>
             <v-row v-if="symbols.length">
                 <v-col
@@ -174,6 +171,7 @@ export default {
             newSymbol: null,
             symbols: [],
             intervalItems: ['disabled', '30s'],
+            operationItems: ['Greater Than', 'Less Than'],
             isConnecting: false
         }
     },
@@ -230,10 +228,12 @@ export default {
                 name: this.newSymbol,
                 status: 'disconnected',
                 interval: '30s',
-                quicklyShouldBuy: null,
-                shouldBuy: null,
-                quicklyShouldSell: null,
-                shouldSell: null
+                triggers: [
+                    {
+                        price: null,
+                        operation: ''
+                    }
+                ]
             }
 
             this.symbols.push(newSymbol)
@@ -271,6 +271,17 @@ export default {
             } else {
                 this.setSymbolsStatus('disconnected')
             }
+        },
+
+        addTrigger (indexSymbol) {
+            this.symbols[indexSymbol].triggers.push({
+                price: null,
+                operation: ''
+            })
+        },
+
+        deleteTrigger (indexSymbol, indexTrigger) {
+            this.symbols[indexSymbol].triggers.splice(indexTrigger, 1)
         },
 
         async toggleService () {
@@ -321,6 +332,9 @@ export default {
 .delete-btn {
     cursor: pointer;
     margin-left: 0.6rem;
+}
+.delete-trigger-btn {
+    cursor: pointer;
 }
 .symbol-text {
     white-space: nowrap;

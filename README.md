@@ -9,7 +9,7 @@ This application has used the Line Application(Messenger) to get the notificatio
 <img src="https://user-images.githubusercontent.com/18566658/143886314-811e7928-d489-48f6-bec3-62ac2a5aed53.png" width="400">
 
 
-for example, when Line Application get the notification.
+For example, when Line Application receives the notification.
 
 <img src="https://user-images.githubusercontent.com/18566658/143887442-e246bbd9-e268-41fb-9815-830db4bd0609.png" width="400">
 
